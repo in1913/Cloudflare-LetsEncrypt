@@ -49,7 +49,7 @@ const getAccountKeyFromPath = () => {
 const client = new acme.Client({
     directoryUrl: acme.directory.letsencrypt.staging,
     accountKey: getAccountKeyFromPath(),
-    accountUrl: 'https://acme-staging-v02.api.letsencrypt.org/acme/acct/179660364',
+    accountUrl: process.env.ACCOUNT_URL,
     backoffAttempts: 10,
     backoffMin: 10000,
     backoffMax: 10000
