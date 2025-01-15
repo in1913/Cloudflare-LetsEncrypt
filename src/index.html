@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="mt-5 bg-secondary-subtle p-3 rounded">
+            <h1>Cloudflare API - Let's Encrypt DNS-01 challenge</h1>
+            <div class="row mt-3">
+                <div class="col-2 d-flex align-items-center justify-content-center">
+                    도메인 등록
+                </div>
+                <div class="col-2 d-flex align-items-center">
+                    Domain Name
+                </div>
+                <div class="col-8">
+                    <input type="text" id="domain" value="solnbiz.com" name="domain" class="form-control rounded" placeholder="example.com">
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-2 d-flex align-items-center justify-content-center">
+                    zoneid 획득
+                </div>
+                <div class="col-2">
+                    <button class="btn btn-primary w-100 disabled" onclick="getZoneId()">Get Zone Id</button>
+                </div>
+                <div class="col-8">
+                    <input type="text" id="zoneid" value="143794bff764e5b792e98c8d7a404621" name="domain" class="form-control rounded bg-primary-subtle border" readonly placeholder="Zone Id"> 
+                </div>
+                
+            </div>
+            <div class="row mt-3">
+                <div class="col-2 d-flex align-items-center justify-content-center">
+                    letsencrypt 키 생성
+                </div>
+                <div class="col-2">
+                    <button class="btn btn-primary w-100 disabled" onclick="createAccountKey()">AccountKey 생성</button>
+                </div>
+                <div class="col-8 d-flex align-items-center" >
+                    <span class=" rounded px-3 py-1" id="AccountKey_result">생성됨</span>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-2 d-flex align-items-center justify-content-center">
+                    letsencrypt 계정 생성
+                </div>
+                <div class="col-2">
+                    <button class="btn btn-primary w-100 disabled" onclick="createAccount()">Account 생성</button>
+                </div>
+                <div class="col-8 d-flex align-items-center" >
+                    <span class="rounded px-3 py-1" id="Account_result">생성됨</span>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-2 d-flex align-items-center justify-content-center">
+                    인증서 요청 및 토큰 획득
+                </div>
+                <div class="col-2">
+                    <button class="btn btn-primary w-100" id="reqCert-btn" onclick="reqCert()">와일드 카드 인증서 요청</button>
+                </div>
+                <div class="col-8 d-flex align-items-center" >
+                    <input type="text" id="cert_result" value="" class="form-control rounded bg-primary-subtle border" readonly placeholder="Token">
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-2 d-flex align-items-center justify-content-center">
+                    TXT 레코드 등록
+                </div>
+                <div class="col-2">
+                    <button class="btn btn-primary w-100" onclick="addTXTRecord()" id="addTxtRecord-btn">TXT 레코드 추가</button>
+                </div>
+                <div class="col-8 d-flex align-items-center" >
+                    <input type="text" id="addTXTRecord_result1" value="" class="form-control rounded bg-primary-subtle border" readonly placeholder="addTXTRecordid1">
+                    <input type="text" id="addTXTRecord_result2" value="" class="form-control rounded bg-primary-subtle border" readonly placeholder="addTXTRecordid2">
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-2 d-flex align-items-center justify-content-center">
+                    DNS TXT 레코드 전파 확인
+                </div>
+                <div class="col-2">
+                    <button class="btn btn-primary w-100" onclick="DnsResolverCheck()">확인</button>
+                </div>
+                <div class="col-8 d-flex align-items-center">
+                    <span class="rounded px-3 py-1" id="TXTRecord_spread_result">0 초</span>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-2 d-flex align-items-center justify-content-center">
+                    ACME 인증 요청
+                </div>
+                <div class="col-2">
+                    <button class="btn btn-primary w-100" onclick="reqAuth()">인증 요청</button>
+                </div>
+                <div class="col-8 d-flex align-items-center" >
+                    <span class="text-white rounded px-3 py-1" id="acme_auth_result"></span>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-2 d-flex align-items-center justify-content-center">
+                    인증서 발급
+                </div>
+                <div class="col-2">
+                    <button class="btn btn-primary w-100" onclick="addTXTRecord()">인증서 발급 요청</button>
+                </div>
+                <div class="col-8 d-flex align-items-center" >
+                    <span class="text-white rounded px-3 py-1" id="TXTRecord_spread_result"></span>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-2 d-flex align-items-center justify-content-center">
+                    TXT 레코드 삭제
+                </div>
+                <div class="col-2">
+                    <button class="btn btn-primary w-100" onclick="deleteTXTRecord()">TXT 레코드 삭제</button>
+                </div>
+                <div class="col-8 d-flex align-items-center" >
+                    <span class="text-white rounded px-3 py-1" id="deleteTXTRecord_result"></span>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-2 d-flex align-items-center justify-content-center">
+                    Cloudflare API 토큰 정보
+                </div>
+                <div class="col-2">
+                    <button class="btn btn-primary w-100" onclick="getTokenInfo()">가져오기</button>
+                </div>
+                <div class="col-8 d-flex align-items-center" >
+                    <span class="text-white rounded px-3 py-1" id="cloudflare_token_result"></span>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</body>
+<script>
+    async function getZoneId() {
+        const domain = document.getElementById('domain').value;
+        const response = await fetch(`/cloudflare/getZoneId?domain=${domain}`);
+        const data = await response.json();
+        document.getElementById('zoneid').value = data.id;
+    }
+
+    async function createAccountKey() {
+        const response = await fetch(`/letsencrypt/createAccountKey`);
+        const data = await response.json();
+
+        document.getElementById('AccountKey_result').innerHTML = data.result;
+        document.getElementById('AccountKey_result').classList.add(data.color);
+    }
+
+    async function createAccount() {
+        const response = await fetch(`/letsencrypt/createAccount`);
+        const data = await response.json();
+
+        document.getElementById('Account_result').innerHTML = data.result;
+        document.getElementById('Account_result').classList.add(data.color);
+    }
+
+    var params;
+    async function reqCert() {
+        const domain = document.getElementById('domain').value;
+        const response = await fetch(`/letsencrypt/reqCert?domain=${domain}`);
+        const data = await response.json();
+
+        document.getElementById('cert_result').value = data.result;
+        document.getElementById('cert_result').classList.add(data.color);
+        document.getElementById('reqCert-btn').classList.add('disabled');
+        params = {
+            domain : domain,
+            order : data.order,
+            authorizations : data.authorizations,
+            TXTcontents : data.TXTcontents
+        }
+        await addTXTRecord(params);
+    }
+
+    async function addTXTRecord(params) {
+        const domain = document.getElementById('domain').value;
+        const zone_id = document.getElementById('zoneid').value;
+        //const txtValue = document.getElementById('cert_result').value;
+        const TXTcontents = params.TXTcontents;
+
+        const response = await fetch(`/cloudflare/addTXTRecord`,{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                domain,
+                zone_id,
+                TXTcontents
+            })
+        });    
+        const data = await response.json();
+
+        if(data.result === '성공!'){
+            document.getElementById('addTXTRecord_result1').value = data.recordIds[0];
+            document.getElementById('addTXTRecord_result2').value = data.recordIds[1];
+            document.getElementById('addTxtRecord-btn').classList.add('disabled');
+            DnsResolverCheck(params);
+        }else{
+            document.getElementById('addTXTRecord_result1').value = data.result;
+        }
+        
+    }
+
+    async function DnsResolverCheck(params) {
+        let seconds = 0;
+        const dnsTXTcheckInterval = setInterval(async () => {
+            seconds++;
+            document.getElementById('TXTRecord_spread_result').innerHTML = `${seconds} 초`;
+            const domain = document.getElementById('domain').value;
+            const txtValue = document.getElementById('cert_result').value;
+            const response = await fetch(`/dns/DnsResolverCheck?domain=${domain}`);
+            const data = await response.json();
+
+            if(data.result === '성공!'){
+                document.getElementById('TXTRecord_spread_result').innerHTML = `${seconds}초 ${data.result}`;
+                document.getElementById('TXTRecord_spread_result').classList.add('bg-success', 'text-white');
+                clearInterval(dnsTXTcheckInterval);
+                await reqAuth(params);
+            }
+
+        }, 1000);
+        
+    }
+
+    async function reqAuth(params) {
+        const response = await fetch(`/letsencrypt/reqAuth`,{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(params)
+        });
+        const data = await response.json();
+
+        document.getElementById('acme_auth_result').innerHTML = data.result;
+        document.getElementById('acme_auth_result').classList.add(data.color);
+    }
+
+    async function deleteTXTRecord() {
+        const zone_id = document.getElementById('zoneid').value;
+        const recordId1 = document.getElementById('addTXTRecord_result1').value;
+        const recordId2 = document.getElementById('addTXTRecord_result2').value;
+        let dnsRecordIds = [];
+        dnsRecordIds.push(recordId1);
+        dnsRecordIds.push(recordId2);
+        const response = await fetch(`/cloudflare/deleteTXTRecord`,{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                zone_id,
+                dnsRecordIds
+            })
+        });
+        const data = await response.json();
+
+        document.getElementById('deleteTXTRecord_result').innerHTML = data.result;
+        document.getElementById('deleteTXTRecord_result').classList.add(data.color);
+        // 초 후 새로고침
+        
+        setTimeout(() => {
+            location.reload();
+        }, 3000);
+        
+    }
+
+    async function getTokenInfo() {
+        const response = await fetch(`/cloudflare/getTokenInfo`);
+        const data = await response.json();
+
+        document.getElementById('cloudflare_token_result').innerHTML = data.result;
+        document.getElementById('cloudflare_token_result').classList.add(data.color);
+    }
+</script>
+</html> 

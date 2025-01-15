@@ -1,0 +1,24 @@
+{
+  "name": "cloudflareletsencrypt",
+  "version": "1.0.0",
+  "main": "src/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "acme-client": "^5.4.0",
+    "axios": "^1.7.9",
+    "body-parser": "^1.20.3",
+    "cloudflare": "^3.5.0",
+    "cors": "^2.8.5",
+    "dns": "^0.2.2",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "nodemon": "^3.1.9",
+    "path": "^0.12.7"
+  },
+  "type": "module"
+}
